@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="cn">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+    <style>
+        #div{
+            width: 360px;
+            height:640px;
+            position: relative;
+            margin:0 auto;
+            background: #eee;
+        }
+
+        #addPic{
+            width:30px;
+            height:30px;
+            background: #00ff00;
+        }
+    </style>
+</head>
+<body>
+<div id="div"></div>
+<div id="addPic"></div>
+</body>
+<script src="myNeedExtend.js"></script>
+<script>
+function PicClipUpload(options) {
+    var that = this;
+    this.settings = {
+        imgWrap:document.getElementById("div"), //放置图片的外面盒子的id
+        addPic:document.getElementById("addPic"), //添加图片的按钮触发dom的id
+    };
+
+    //修改默认值
+    if(typeof options === "object"){
+        for(var i in options){
+            this.settings[i] = options[i];
+        }
+    }
+
+    //实例化自己写的库
+    this.myExtend = new MyNeedExtend();
+
+    //防止兼容问题，清空div内部代码
+    this.settings.imgWrap.innerHTML = null;
+
+    //创建显示图片的canvas
+    this.canvas = document.createElement("canvas");
+    this.canvas.style.cssText = "width:100%; height:100%;";
+
+    this.settings.imgWrap.appendChild(this.canvas);
+    this.ctx = this.canvas.getContext("2d");
+
+    //创建input的file的dom
+    this.input = document.createElement("input");
+    this.input.type = "file";
+    this.input.addEventListener("change",function () {
+        //判断一下是否是图片格式
+        if(!/image\/\w+/.test(that.input.files[0].type)){
+            console.log("文件的格式错误");
+            return;
+        }
+
+        console.log(that.input.files[0]);
+        that.reader.readAsDataURL(that.input.files[0]);
+    });
+
+    //实例化FileReader对象来获取图片资源
+    this.reader = new FileReader();
+    this.reader.onload = function (event) {
+        console.log(event.target.result);
+        that.image.src = event.target.result;
+    };
+
+    //创建一个image，获取图片大小和纹理放到image对象内
+    this.image = new Image();
+    this.image.onload = function () {
+        that.canvas.width = that.image.width;
+        that.canvas.height = that.image.height;
+        console.log(that.ctx);
+        that.ctx.drawImage(that.image,0,0);
+    };
+
+    //给addPic绑定点击事件
+    this.myExtend.touch(this.settings.addPic).on("tap",function () {
+        that.openInput();
+    });
+
+    this.openInput = function () {
+        that.input.click();
+    }
+}
+
+new PicClipUpload();
+</script>
+</html>
