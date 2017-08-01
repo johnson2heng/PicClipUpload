@@ -103,6 +103,8 @@
     //调用函数获取到img的data数据
     var data = canvasWrapText({canvas:document.getElementById("canvas"),text:string});
 
+    /*--------------------------如果只需要在canvas里面显示，那就只需要调用函数，会直接显示在canvas里面-------------------------------*/
+
     //创建一个img对象，在页面上显示打印的数据
     var img = document.createElement("img");
     img.src = data;
