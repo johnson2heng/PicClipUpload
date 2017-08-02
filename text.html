@@ -17,21 +17,23 @@
 <canvas id="canvas"></canvas>
 </body>
 <script>
-    var string = "火影忍者，尾兽拥有无穷无尽的查克拉和战斗力，被称为“凶暴的神”，因此在忍界大战中各国为了胜利都会不择手段地去争夺它。然而，能找到尾兽并不代表你就能控制它们，要想控制它们有两种办法。一种是与尾兽彼此理解互相信任，比如鸣人那样；另一种则是凭借绝对力量完全控制尾兽！能做到前者的不少，比如鸣人、奇拉比、二位由木人等等，可拥有后者实力的却只有三人。六道仙人是大筒木辉夜的长子，继承了辉夜之力中的“轮回眼”，和弟弟大筒木羽村一起封印了十尾，是火影世界的第一个十尾人柱力。六道仙人在临终前把十尾分离出了九个尾兽，也就是大家熟知的一尾到九尾。";
+    var string = "火影忍者，尾兽拥有无穷无尽的查克拉和战斗力，被称为“凶暴的神”，因此在忍界大战中各国为了胜利都会不择手段地去争夺它。然而，能找到尾兽并不代表你就能控制它们，要想控制它们有两种办法。一种是与尾兽彼此理解互相信任，比如鸣人那样；另一种则是凭借绝对力量完全控制尾兽！能做到前者的不少，比如鸣人、奇拉比、二位由木人等等，可拥有后者实力的却只有三人。火影忍者，尾兽拥有无穷无尽的查克拉和战斗力，被称为“凶暴的神”，因此在忍界大战中各国为了胜利都会不择手段地去争夺它。然而，能找到尾兽并不代表你就能控制它们，要想控制它们有两种办法。一种是与尾兽彼此理解互相信任，比如鸣人那样；另一种则是凭借绝对力量完全控制尾兽！能做到前者的不少，比如鸣人、奇拉比、二位由木人等等，可拥有后者实力的却只有三人。";
 
     //绘制文字到canvas，判断换行位置，和设置canvas高度
     function canvasWrapText(options) {
+        //有时候设置的文字显示不全，需要仔细摸索行高，和绘制起始y坐标和字体大小之间的关系 更简单粗暴的就是下面canvas.height 赋值的时候多赋值点
         var settings = {
-            canvas:document.getElementsByTagName("canvas")[0], //canvas对象，必填，不填写默认找到页面中的第一个canvas
-            canvasWidth:480, //canvas的宽度
+            canvas:document.createElement("canvas"), //canvas对象，必填，不填写默认创建一个canvas
+            canvasWidth:580, //canvas的宽度
+            canvasMinHeight:360, //canvas的最小高度,如果不需要可以设置为0
             drawStartX:10, //绘制字符串起始x坐标
-            drawStartY:30, //绘制字符串起始y坐标
+            drawStartY:24, //绘制字符串起始y坐标
             lineHeight:30, //文字的行高
             font:"24px 'Microsoft Yahei'", //文字样式
             text:"请修改掉默认的配置", //需要绘制的文本
-            drawWidth:460, //文字显示的宽度
+            drawWidth:560, //文字显示的宽度
             color:"#000000", //文字的颜色
-            backgroundColor:"#ffffff", //背景颜色
+            backgroundColor:"#fff00f" //背景颜色
         };
 
         //将传入的配置覆盖掉默认配置
@@ -45,10 +47,6 @@
         var canvas = settings.canvas;
         canvas.width = settings.canvasWidth;
         var ctx = canvas.getContext("2d");
-
-        //绘制背景色
-        ctx.fillStyle = settings.backgroundColor;
-        ctx.fillRect(0,0,canvas.width,canvas.height);
 
         //绘制文字
         ctx.font = settings.font;
@@ -78,8 +76,19 @@
         }
 
         //根据arr的长度设置canvas的高度
-        canvas.height = arr.length*settings.lineHeight+settings.drawStartY;
+        canvas.height = arr.length*settings.lineHeight;
+        //判断是否达到最小高度
+        if(canvas.height < settings.canvasMinHeight){
+            //重新设置起始位置
+            settings.drawStartY += (settings.canvasMinHeight-canvas.height)/2;
+            canvas.height = settings.canvasMinHeight;
+        }
 
+        //绘制背景色
+        ctx.fillStyle = settings.backgroundColor;
+        ctx.fillRect(0,0,canvas.width,canvas.height);
+
+        //设置字体颜色
         ctx.font = settings.font;
         ctx.fillStyle = settings.color;
         for(var i =0; i<arr.length; i++){
@@ -109,7 +118,6 @@
     var img = document.createElement("img");
     img.src = data;
     document.body.appendChild(img);
-    console.log();
 
 </script>
 </html>
