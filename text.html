@@ -27,7 +27,7 @@
             canvasWidth:580, //canvas的宽度
             canvasMinHeight:360, //canvas的最小高度,如果不需要可以设置为0
             drawStartX:10, //绘制字符串起始x坐标
-            drawStartY:24, //绘制字符串起始y坐标
+            drawStartY:15, //绘制字符串起始y坐标
             lineHeight:30, //文字的行高
             font:"24px 'Microsoft Yahei'", //文字样式
             text:"请修改掉默认的配置", //需要绘制的文本
@@ -90,6 +90,7 @@
 
         //设置字体颜色
         ctx.font = settings.font;
+        ctx.textBaseline = "middle";
         ctx.fillStyle = settings.color;
         for(var i =0; i<arr.length; i++){
             ctx.fillText(arr[i],settings.drawStartX,settings.drawStartY+i*settings.lineHeight);
