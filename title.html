@@ -15,7 +15,7 @@
             canvas:document.createElement("canvas"), //显示的canvas
             width:120, //显示的canvas宽度
             height:40, //显示的canvas高度
-            text:"这一段是测试的代码，用于测试效果的。为了加长度，多谢一些废话来加到足够的长度。", //显示的内容
+            text:"这一段是", //显示的内容
             font:"20px 'Microsoft YaHei'", //字体样式
             color:"#ffffff", //字体颜色
             backgroundColor:"#000", //背景色
@@ -43,7 +43,11 @@
             canvas.height = settings.height;
             var ctx = canvas.getContext("2d");
             ctx.font = settings.font;
-            canvas.width = ctx.measureText(settings.text).width;
+			if(ctx.measureText(settings.text).width < settings.width){
+				canvas.width = settings.width;
+			}else{
+				canvas.width = ctx.measureText(settings.text).width;
+			}
 
             ctx.fillStyle = settings.backgroundColor;
             ctx.fillRect(0,0,canvas.width,canvas.height);
@@ -51,13 +55,22 @@
             ctx.font = settings.font;
             ctx.fillStyle = settings.color;
             ctx.textBaseline = "middle";
-            ctx.fillText(settings.text,0,settings.height/2);
+			if(canvas.width === settings.width){
+				ctx.textAlign="center";
+				ctx.fillText(settings.text,settings.width/2,settings.height/2);
+			}else{
+				ctx.fillText(settings.text,0,settings.height/2);
+			}
+            
             //创建img对象
             var img = settings.img;
             img.src = canvas.toDataURL();
             img.onload = function () {
                 settings.imgWidth = canvas.width;
                 that.drawToCancas(img);
+				if(canvas.width > settings.width){
+					settings.canMove = true;
+				}
             }
         };
 
@@ -70,7 +83,6 @@
             canvas.height = settings.height;
             var ctx = canvas.getContext("2d");
             ctx.drawImage(settings.img,0,0,canvas.width,canvas.height,0,0,canvas.width,canvas.height);
-            settings.canMove = true;
         };
 
         //canvas内的图片移动方法
