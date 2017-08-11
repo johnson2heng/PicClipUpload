@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+<canvas id="mycanvas" style="width:480px; height:360px; display: block; margin:0 auto; box-shadow: 0 0 10px #000;"
+        width="480" height="360"></canvas>
+<p style="text-align: center">
+    <button class="up">向上移动</button>
+    <button class="down">向下移动</button>
+    <button class="left">向左移动</button>
+    <button class="right">向右移动</button>
+    <button class="enlarge">放大</button>
+    <button class="narrow">缩小</button>
+    <button class="save">保存为图片</button>
+</p>
+</body>
+</html>
+<script>
+    var canvas = document.getElementById("mycanvas");
+    var cxt = canvas.getContext("2d");
+    //context.drawImage(img,sx,sy,swidth,sheight,x,y,width,height);
+    //cxt.drawImage(图片对象,开始剪切的 x 坐标位置,开始剪切的 y 坐标位置,图片设置的宽,图片设置的高,在画布上放置图像的 x 坐标位置，在画布上放置图像的 y 坐标位置，要使用的图像的宽度。（伸展或缩小图像），要使用的图像的高度。（伸展或缩小图像）);
+    var obj = {
+        img: null, //图片对象
+        imgPath: "10.jpg", // 图片地址路径
+        imgWidth: 0, //图片的宽度
+        imgHeight: 0, //图片的高度
+        canvasWidth: 480, //canvas的宽度
+        canvasHeight: 360, //canvas的高度
+        currentImgWidth: 0, //实际绘制的宽度
+        currentImgHeight: 0, //实际绘制的高度
+        //缩放相关的一些属性
+        scale: 1, //当前图片的缩放
+        scrollScale: 1.1, //每次事件图片放大的倍数
+        maxScale: 5, //图形可以放大的最大倍数
+        fullDistance: "", //默认状态下百分百的是宽度还是高度 width or height
+        //canvas渲染的一些相关属性
+        sx: 0, //开始剪切的 x 坐标位置
+        sy: 0, //开始剪切的 y 坐标位置
+        swidth: 0, //被剪切图像的宽度
+        sheight: 0, //被剪切图像的高度
+        x: 0, //在画布上放置图像的 x 坐标位置
+        y: 0, //在画布上放置图像的 y 坐标位置
+        width: 0, //要使用的图像的宽度。（伸展或缩小图像）
+        height: 0, //要使用的图像的高度。（伸展或缩小图像）
+        //当前canvas中心点在图片中的点的位置的百分比
+        canvasCenterXForImagePercent: 50, //中心x轴在图片的百分比
+        canvasCenterYForImagePercent: 50, //中心点y轴在图片的百分比
+        canvasCenterXChangePercent:5, //每次移动x轴移动的百分比
+        canvasCenterYChangePercent:5, //每次移动y轴移动的百分比
+    };
+    //计算第一次贴图显示最大区域
+    //计算图片比例和canvas比例
+    var img = new Image();
+    img.src = obj.imgPath;
+    img.onload = function () {
+        obj.imgWidth = img.width;
+        obj.imgHeight = img.height;
+        obj.canvasWidth = canvas.width;
+        obj.canvasHeight = canvas.height;
+        obj.img = img;
+
+        if (obj.imgWidth / obj.imgHeight >= obj.canvasWidth / obj.canvasHeight) {
+            //如果图片宽度比canvas宽度比大，计算出实际图片显示大小
+            obj.currentImgWidth = obj.canvasWidth;
+            obj.currentImgHeight = obj.currentImgWidth / (obj.imgWidth / obj.imgHeight);
+
+            obj.fullDistance = "width";
+
+            //设置渲染
+            cxt.drawImage(img, 0, 0, obj.imgWidth, obj.imgHeight, 0, (obj.canvasHeight - obj.currentImgHeight) / 2, obj.currentImgWidth, obj.currentImgHeight);
+        } else {
+            obj.currentImgHeight = obj.canvasHeight;
+            obj.currentImgWidth = obj.currentImgHeight * (obj.imgWidth / obj.imgHeight);
+
+            obj.fullDistance = "height";
+
+            //设置渲染
+            cxt.drawImage(img, 0, 0, obj.imgWidth, obj.imgHeight, (obj.canvasWidth - obj.currentImgWidth) / 2, 0, obj.currentImgWidth, obj.currentImgHeight);
+        }
+
+        //初始化交互事件
+        init();
+    };
+
+    function init() {
+        document.getElementsByClassName("up")[0].onclick = function () {
+            obj.canvasCenterYForImagePercent -= obj.canvasCenterYChangePercent;
+            draw();
+        };
+        document.getElementsByClassName("down")[0].onclick = function () {
+            obj.canvasCenterYForImagePercent += obj.canvasCenterYChangePercent;
+            draw();
+        };
+        document.getElementsByClassName("left")[0].onclick = function () {
+            obj.canvasCenterXForImagePercent -= obj.canvasCenterXChangePercent;
+            draw();
+        };
+        document.getElementsByClassName("right")[0].onclick = function () {
+            obj.canvasCenterXForImagePercent += obj.canvasCenterXChangePercent;
+            draw();
+        };
+
+        document.getElementsByClassName("enlarge")[0].onclick = function () {
+            //放大效果
+            obj.scale = obj.scale * obj.scrollScale;
+            draw();
+        };
+
+        document.getElementsByClassName("narrow")[0].onclick = function () {
+            //缩小效果
+            obj.scale = obj.scale / obj.scrollScale;
+            draw();
+        };
+
+        document.getElementsByClassName("save")[0].onclick = function () {
+            //缩小效果
+            var image = new Image();
+            image.src = canvas.toDataURL();
+            document.body.appendChild(image);
+        };
+    }
+
+    function draw() {
+        cxt.clearRect(0, 0, canvas.width, canvas.height);
+
+        //首先判断scale倍数是否处于正常的倍数内
+        if (obj.scale <= 1) {
+            obj.scale = 1;
+        } else if (obj.scale > obj.maxScale) {
+            obj.scale = obj.maxScale;
+        }
+
+        //获取现在当前图片显示的高度和宽度
+        var width = obj.currentImgWidth * obj.scale; //图片放大后的实际宽度
+        var height = obj.currentImgHeight * obj.scale; //图片放大后的实际高度
+
+        //确实显示宽度啊和切图位置
+        if (width >= obj.canvasWidth) {
+            //现在缩放尺度已经大于了canvas的宽度
+
+            //首先保证中心点到最左侧能够渲染开，保证左侧不会出现白边
+            if (width * obj.canvasCenterXForImagePercent / 100 < obj.canvasWidth / 2) {
+                //如果中心点太偏左，矫正
+                obj.canvasCenterXForImagePercent = obj.canvasWidth / 2 / width*100;
+            } else if (width * (1 - obj.canvasCenterXForImagePercent / 100) < obj.canvasWidth / 2) {
+                //如果中心点太偏右，矫正百分比位置
+                obj.canvasCenterXForImagePercent = (1 - obj.canvasWidth / 2 / width)*100;
+            }
+
+            obj.sx = (width * obj.canvasCenterXForImagePercent/100 - obj.canvasWidth / 2) / width * obj.imgWidth; //图片裁剪开始位置
+            obj.swidth = obj.imgWidth * (obj.canvasWidth / width); //图片裁剪宽度
+
+            obj.x = 0; //绘制开始于canvas的位置
+            obj.width = obj.canvasWidth; //绘制的宽度
+        } else {
+            obj.sx = 0; //图片裁剪开始位置
+            obj.swidth = obj.imgWidth; //图片裁剪宽度
+
+            obj.x = (obj.canvasWidth - width) / 2; //图片绘制开始位置
+            obj.width = width; //绘制的宽度
+        }
+
+        //确定裁剪的高度位置和绘制的位置
+        if (height >= obj.canvasHeight) {
+            //如果当前缩放尺度大于canvas的高度
+
+            //首先保证没有白边，先判断百分比位置
+            if (height * obj.canvasCenterYForImagePercent / 100 < obj.canvasHeight / 2) {
+                obj.canvasCenterYForImagePercent = obj.canvasHeight / 2 / height*100;
+            } else if (height * (1 - obj.canvasCenterYForImagePercent / 100) < obj.canvasHeight / 2) {
+                obj.canvasCenterYForImagePercent = (1 - obj.canvasHeight / 2 / height)*100;
+            }
+
+            obj.sy = (height*obj.canvasCenterYForImagePercent/100 - obj.canvasHeight/2) / height * obj.imgHeight; //图片裁剪开始位置
+            obj.sheight = obj.imgHeight*(obj.canvasHeight / height); //图片裁剪的高度
+
+            obj.y = 0; //绘制开始位置
+            obj.height = obj.canvasHeight; //绘制的高度
+        } else {
+            obj.sy = 0; //图片裁剪开始位置
+            obj.sheight = obj.imgHeight; //图片裁剪的高度
+
+            obj.y = (obj.canvasHeight - height) / 2; //绘制开始位置
+            obj.height = height; //绘制的高度
+        }
+
+        //开始绘制
+        cxt.drawImage(obj.img, obj.sx, obj.sy, obj.swidth, obj.sheight, obj.x, obj.y, obj.width, obj.height);
+    }
+</script>
