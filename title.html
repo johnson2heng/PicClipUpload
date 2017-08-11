@@ -48,14 +48,10 @@
 			}else{
 				canvas.width = ctx.measureText(settings.text).width;
 			}
-
-            ctx.fillStyle = settings.backgroundColor;
-            ctx.fillRect(0,0,canvas.width,canvas.height);
-
             ctx.font = settings.font;
             ctx.fillStyle = settings.color;
             ctx.textBaseline = "middle";
-			if(canvas.width === settings.width){
+			if(canvas.width === Math.floor(settings.width)){
 				ctx.textAlign="center";
 				ctx.fillText(settings.text,settings.width/2,settings.height/2);
 			}else{
@@ -82,6 +78,8 @@
             canvas.width = settings.width;
             canvas.height = settings.height;
             var ctx = canvas.getContext("2d");
+			ctx.fillStyle = settings.backgroundColor;
+            ctx.fillRect(0,0,canvas.width,canvas.height);
             ctx.drawImage(settings.img,0,0,canvas.width,canvas.height,0,0,canvas.width,canvas.height);
         };
 
@@ -92,7 +90,8 @@
             var ctx = settings.canvas.getContext("2d");
             if(!settings.canMove) return false;
 
-            ctx.clearRect(0,0,settings.width,settings.height);
+			ctx.fillStyle = settings.backgroundColor;
+            ctx.fillRect(0,0,settings.width,settings.height);
 
             settings.startDrawImage += settings.textMoveStep;
             if(settings.startDrawImage > settings.imgWidth){
@@ -106,6 +105,11 @@
             }
 
         };
+		
+		//获取canvas对象
+		this.getCanvas = function () {
+			return this.settings.canvas;
+		}
     }
 
     var canvas = new CanvasTitle({canvas:document.getElementById("canvas")});
