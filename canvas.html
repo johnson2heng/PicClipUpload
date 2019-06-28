@@ -18,6 +18,7 @@
     <button class="enlarge">放大</button>
     <button class="narrow">缩小</button>
     <button class="save">保存为图片</button>
+    <button class="load">下载图片</button>
 </p>
 </body>
 </html>
@@ -124,6 +125,14 @@
             var image = new Image();
             image.src = canvas.toDataURL();
             document.body.appendChild(image);
+        };
+
+        document.getElementsByClassName("load")[0].onclick = function () {
+            //下载图片
+            var a = document.createElement("a");
+            a.href = canvas.toDataURL();
+            a.download = 'img';
+            a.click();
         };
     }
 
